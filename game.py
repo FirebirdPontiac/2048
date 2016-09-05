@@ -4,6 +4,7 @@ Implementation of the Game2048 class that will handle the 2048 game
 
 import numpy as np
 from random import randint
+import copy
 
 class Game2048(object):
     
@@ -125,7 +126,8 @@ class Game2048(object):
             # First we move all the squares we can and save the moves.
             # For e.g., if move == 'RIGHT', we begin to move the squares of the
             # right of the grid, and till the squares form the left.
-            
+
+            old_grid = copy.copy(self.grid)
             for i in range_i:
                 for j in range_j:
                     if self.grid[i][j] != 0:
@@ -144,8 +146,15 @@ class Game2048(object):
                             elif self.grid[tup[0]][tup[1]] == 0:
                                 n_i = tup[0]
                                 n_j = tup[1]
-                            elif (self.grid[i][j] == self.grid[tup[0]][tup[1]]):
-                                if (tup[0],tup[1]) not in [el[1] for el in moves]:
+                            elif (self.grid[i][j] == self.grid[tup[0]][tup[1]]) \
+                                    and (self.grid[tup[0]][tup[1]] != 0):
+                                nb_dest = 0
+                                for el in moves:
+                                    if el[1] == (tup[0],tup[1]):
+                                        nb_dest+=1
+                                cond = (nb_dest == 0) or ((nb_dest == 1) and \
+                                        old_grid[tup[0]][tup[1]] == 0)
+                                if cond:
                                     self.grid[tup[0]][tup[1]]*=2
                                     self.grid[i][j] = 0
                                     moves.append(((i,j),(tup[0],tup[1])))
@@ -162,8 +171,10 @@ class Game2048(object):
                                     self.grid[i][j] = 0
                                     moves.append(((i,j),(n_i,n_j)))
                                 break
-
+            self.update_score()
             return moves
+        else:
+            return []
 
 
 
